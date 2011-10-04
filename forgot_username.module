@@ -1,0 +1,69 @@
+<?php
+function forgot_username_menu() {
+  $items['user/username'] = array(
+    'title'            => 'Forgot your Username?',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('forgot_username_form'),
+    'access arguments' => array('access content'),
+    'description'      => 'Allows a user to submit their email to receive their username',
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * generate the form where the user requests their username
+ *
+ * @return
+ *   The settings form used by the user to request their username
+ */
+function forgot_username_form() {
+  $form['email_address'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Your email'),
+    '#description' => t("We will send your username to your email"),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Request Username'),
+  );
+  $form['#submit'][] = 'forgot_username_form_submit';
+  return $form;
+}
+
+/**
+ * Form validation handler.
+ */
+function forgot_username_form_validate($form, &$form_state) {
+  if(!valid_email_address($form_state['values']['email_address']))
+    form_set_error("email_address", "Inavlid email address");
+}
+
+
+/**
+ * Form submission handler.
+ */
+function forgot_username_form_submit($form, &$form_state) {
+
+  //$query="SELECT name FROM users WHERE mail = 'rkamhi@westmonroepartners.com'";
+  //$result=db_query($query);
+  $query="select name from {users} where mail = '%s'";
+  $result=db_query($query, $form_state['values']['email_address']);
+  //dpm($query, "query is: ");
+  $user=db_fetch_array($result);
+  if(!$user)
+    form_set_error('email_address', 'There is no account with that address');
+    else  {
+     
+      $message = array(
+        'to' => $form_state['values']['email_address'],
+        'subject' => t('Your requested username'),
+        'body' => t('Your username is: '.$user['name']),
+        'headers' => array('From' => 'admin@arcsfoundation.com'),
+      );
+
+drupal_mail_send($message);
+drupal_set_message('We have sent your username to your email');
+drupal_goto(drupal_get_normal_path(variable_get('site_frontpage', 'node')));
+    }
+}

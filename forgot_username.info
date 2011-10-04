@@ -1,0 +1,4 @@
+name = Forgot Username
+description = "This module sends the user an email if they forgot their username"
+core = 6.x
+package = Arcs
