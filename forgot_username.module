@@ -44,12 +44,8 @@ function forgot_username_form_validate($form, &$form_state) {
  * Form submission handler.
  */
 function forgot_username_form_submit($form, &$form_state) {
-
-  //$query="SELECT name FROM users WHERE mail = 'rkamhi@westmonroepartners.com'";
-  //$result=db_query($query);
   $query="select name from {users} where mail = '%s'";
   $result=db_query($query, $form_state['values']['email_address']);
-  //dpm($query, "query is: ");
   $user=db_fetch_array($result);
   if(!$user)
     form_set_error('email_address', 'There is no account with that address');
